@@ -1,0 +1,13 @@
+/* CSS */
+
+/* Perfil */
+
+.perfil-image img {
+    width: 160px;
+    height: 160px;
+}
+
+.user-panel-exit{
+    margin-top: 5px;
+    margin-left: 5px;
+}

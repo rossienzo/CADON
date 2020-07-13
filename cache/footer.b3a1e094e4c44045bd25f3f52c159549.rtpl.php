@@ -1,0 +1,38 @@
+<?php if(!class_exists('Rain\Tpl')){exit;}?>
+    <!-- 
+      <footer class="bg-dark">      
+      <div class="container">
+        <div class="row pt-2 pb-4">
+          <div class="col-md-6">
+            <a href="/" class="branding-link">
+              <div class="branding-fab">
+                <i class="fab fa-cuttlefish text-light"></i>
+              </div>
+              <h3 class="text-center text-light">CADON</h3>
+            </a>
+          </div>
+
+          <div class="col-md-6 bg-transparent">
+            <address class="mt-4 text-light text-center">
+              <p>Voce pode contatar o autor em <a href="http.localhost.com.br" class="text-primary">www.domain.com</a></p>
+              <p>Se encontrar qualquer bug, por favor <a href="master.cadon@hotmail.com" class="text-primary">contate o administrador do site</a></p>
+            </address>
+          </div>
+        </div>
+      </div>
+    </footer>
+     -->
+
+     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+     
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+     
+     <script src="../res/js/jquery-3.5.1.min.js"></script>
+ 
+     <script src="../res/js/main.js" ></script>
+     
+ </body>
+ 
+ </html>

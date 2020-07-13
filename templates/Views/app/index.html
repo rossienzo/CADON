@@ -1,0 +1,97 @@
+
+    <section id="app-main">
+      <div class="container">
+        <div class="row">
+
+          <div class="col-md-3 menu">
+            <ul class="list-group shadow-sm">
+              <li class="list-group-item disabled">{$user['desname']}</li>
+              <li class="list-group-item active"><a href="/application" class="">Tarefas pendentes</a></li>
+              <li class="list-group-item"><a href="/new-task">Nova tarefa</a></li>
+              <li class="list-group-item"><a href="/all-tasks">Todas as tarefas</a></li>
+              
+            </ul>
+          </div>
+
+          <div class="col-md-9 shadow-sm text-justify list-itens">
+            <h3>Tarefas pendentes</h3>
+            <hr />
+            {if="$tasks === 'empty'"}
+            <div class="form-group bg-warning text-white text-center pt-2 pb-2">
+              <span>Não há nenhuma tarefa pendente</span>
+            </div>
+            {/if}
+            <table class="table">
+              <thead class="thead-white">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Tarefa</th>
+                  <th scope="col">Configurar</th>
+                </tr>
+              </thead>
+              <tbody id="tasks-group">
+                {loop="$tasks"}
+                <tr  class="list-itens">
+                  <th scope="row">{$key + 1}</th>
+                  <td class="description">
+                    
+                    <p id="task-{$value.idtask}">{$value.destask} <small>({$value.status})</small> </p> 
+                    <br />
+                    <small style="display: none;" id="dt-task-{$key + 1}">Data da criação: {$value.dtregistertask}</small>
+                  </td>
+                  
+                  <td class="configuration-group">
+                    <form action="/application?id={$value.idtask}?task={$value.destask}?status={$value.status}" method="POST">
+                      <button type="submit" name="confirm" class="btn">
+                        <i class="fas fa-check-square fa-lg text-success"></i>
+                      </button>
+
+                      <button type="button" name="edit" onclick="editTask({$value.idtask}, '{$value.destask}')" class="btn">
+                        <i class="fas fa-edit fa-lg text-info" ></i>
+                      </button>
+
+                      <button type="submit" name="delete" class="btn">
+                        <i class="fas fa-trash-alt fa-lg text-danger"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {/loop}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- <div class="col-md-9 shadow-sm text-justify list-itens">
+            <h3>Tarefas pendentes</h3>
+            <hr />
+            <ul id="tasks-group" class="list-group list-group-flush">
+              <div class="row">
+                {loop="$tasks"}
+
+                <div class="col-sm-9">
+                  <li class="list-group-item">
+                    {$key + 1} - {$value.destask}
+                    <br />
+                    <small style="display: none;" id="dt-task-{$key + 1}">Data da criação: {$value.dtregistertask}</small>
+                  <small  id="dt-task-{$key + 1}">Data da criação: {$value.dtregistertask}</small>
+                  </li>
+                </div>
+
+                <div class="col-sm-3">
+                  <div class="col-sm-3 mt-2 d-flex justify-content-between">
+                    <i class="fas fa-trash-alt fa-lg text-danger"></i>
+                      <i class="fas fa-edit fa-lg text-info"></i>
+                      <i class="fas fa-check-square fa-lg text-success"></i>
+                  </div> 
+                </div>
+
+                {/loop}
+              </div>
+            </ul>
+          </div> -->
