@@ -39,7 +39,7 @@ class Task
 
     public function selectStatus($status)
     {
-        $sql = 'SELECT a.idtask, b.status, a.destask, a.dtregistertask FROM tb_tasks as a
+        $sql = 'SELECT a.idtask, b.status, a.destask, DATE_FORMAT(a.dtregistertask,"%d-%m-%Y %H:%i:%s") as dtregistertask FROM tb_tasks as a
         CROSS JOIN tb_taskstatus as b ON a.idstatus = b.idstatus
         WHERE iduser = :IDUSER && b.status = :STATUS';
 

@@ -157,6 +157,35 @@ Route::add('/admin/extras/forgot-password', function() {
   
 });
 
+Route::add('/pages/users', function() {
+
+  $adminController = new AdminController();
+  $image = new Image();
+  $user = new User();
+  $adminController->userAuthValidation();
+
+  $id = $_SESSION['id'];
+
+  // Data from perfil of user admin 
+  $user_results = $user->listAll($id);
+  $userphoto = $image->userPerfilImage($id);
+  $adminController->assignValues('userphoto', $userphoto);
+  $adminController->assignValues('user', $user_results);
+  
+  isset($_GET['limit'])? $query = $_GET['limit'] : $query = '' ;
+
+  var_dump($query);
+  $adminController->assignValues('listUsers', $adminController->listUsers($id));
+
+
+  $adminController->drawView("admin/header");
+  $adminController->drawView("admin/aside");
+  $adminController->drawView("admin/pages/users");
+  $adminController->drawView("admin/footer");
+  
+});
+
+
 Route::add('/admin/exit', function() {
   
   $adminController = new AdminController();

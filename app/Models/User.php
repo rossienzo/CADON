@@ -31,6 +31,20 @@ class User
         return $this->$attrib;
     }
 
+    // Seleciona todos os usuários menos o usuário logado
+    public function selectDifferenceOfLoggedUser($id)
+    {
+        $sql = "SELECT * FROM tb_users WHERE iduser != :IDUSER";
+        
+        $conn = Connection::open('config');
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':IDUSER', $id);
+        $stmt->execute();
+        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        return $results;
+    }
+
     public function listAll($id)
     {
         $sql = "SELECT * FROM tb_users WHERE iduser = :ID";

@@ -33,4 +33,11 @@ class AdminController extends Controller
 
             $user->insert();
     }
+
+    public function listUsers($id)
+    {
+        $user = new User();
+
+        return $user->selectDifferenceOfLoggedUser($id);
+    }
 }

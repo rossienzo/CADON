@@ -25,7 +25,6 @@ Route::add('/application', function(){
       $dataTasks = $appController->selectTasks('pendente');
     }
     
-  
     $appController->assignValues('tasks', $dataTasks);
     $appController->assignValues('user', $dataUser);
   
