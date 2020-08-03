@@ -1,21 +1,8 @@
-<?php if(!class_exists('Rain\Tpl')){exit;}?><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CADON - Login</title>
-    <link rel="stylesheet" href="../res/css/bootstrap.css">
-    <link rel="stylesheet" href="../res/css/main.css">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-        
-</head>
-<body id="login">
+<?php if(!class_exists('Rain\Tpl')){exit;}?><body id="login">
   <div class="container form-container ">
     <div class="mx-auto form-center">
 
-      <form class="border-0 rounded" method="POST" action="/auth">
+      <form class="border-0 rounded" method="POST" action="/login">
 
           <a href="/" class="branding-link">
             <div class="branding-fab">
@@ -24,16 +11,15 @@
             <h3 class="mx-auto">CADON</h3>
           </a>
           
-          
-        <?php if( $msg != '' ){ ?>
-        <div class="form-group bg-danger text-white text-center pt-2 pb-2">
-          <span>Usuário ou Senha incorretos!</span>
+        <?php if( $error != '' ){ ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars( $error, ENT_COMPAT, 'UTF-8', FALSE ); ?>
         </div>
-        <?php } ?>
+        <?php } ?>  
         
         <div class="form-group">
           <label for="exampleInputEmail1">Usuário</label>
-          <input type="text" class="form-control" id="exampleInputEmail1" name="name" aria-describedby="emailHelp">
+          <input type="text" class="form-control" id="exampleInputEmail1" name="login" aria-describedby="emailHelp">
           <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
         <div class="form-group">

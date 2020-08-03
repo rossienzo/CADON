@@ -11,3 +11,23 @@
     margin-top: 5px;
     margin-left: 5px;
 }
+
+#profile-group .input-text-size
+{
+    border: 1px solid darkslategrey;
+    padding: 3px 0px 6px 8px
+}
+
+
+/* Link a */
+
+#profile-group a 
+{
+    color: #007bff;
+}
+
+#profile-group a:hover
+{
+    color: #035ebe;
+    cursor: pointer;
+}

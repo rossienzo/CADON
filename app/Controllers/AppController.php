@@ -2,34 +2,27 @@
 
 namespace App\Controllers;
 
-use Src\Database\Connection;
 use App\Models\User;
-use App\Models\Image;
 use App\Models\Task;
-use PDOException;
 
 class AppController extends Controller
 {
-
-    public function itemConfig($data)
+    public function configurationTask()
     {
-        
         $task = new Task();
-        $idtask = $task->__set('idtask', str_replace('id=', '', $data[1]));
-        $iduser = $task->__set('iduser', $_SESSION['id']);
-        $destask = $task->__set('destask', str_replace('task=', '', $data[2]));
-        $idstatus = $task->__set('idstatus', str_replace('status=', '', $data[3]));
-        
-        if ($data[0] == '/application')
+
+        switch($_POST)
         {
-            if (isset($_POST["delete"]))
-            {
-                $task->delete();
-                header("Location: /application");
-            }
-            else if(isset($_POST["confirm"]))
-            {
-                if ($idstatus == 'pendente')
+            case isset($_POST["confirm"]):
+                $postTask = explode('&', $_POST["confirm"]); // pega os dados contido no value do button
+                
+                $idtask = $postTask[0]; // id da tarefa
+                $statusTask = $postTask[1]; // status da tarefa
+
+                $task->__set('idtask', $idtask);
+                $task->__set('iduser', $_SESSION[User::SESSION]["iduser"]);
+
+                if ($statusTask === 'pendente')
                 {
                     $task->updateIndex('idstatus', 2);
                 }
@@ -37,123 +30,104 @@ class AppController extends Controller
                 {
                     $task->updateIndex('idstatus', 1);
                 }
+                
+            break;
 
-                header("Location: /application");
-            }
-            
-        } 
-        else if ($data[0] == '/all-tasks')
-        {
-            if (isset($_POST["delete"]))
-            {
+            case isset($_POST["delete"]):
+                
+                $idtask = $_POST["delete"]; // id da tarefa
+
+                $task->__set('idtask', $idtask);
+                $task->__set('iduser', $_SESSION[User::SESSION]["iduser"]);
                 $task->delete();
-                header("Location: /all-tasks");
-            }
-            else if(isset($_POST["confirm"]))
-            {
-                if ($idstatus == 'pendente')
-                {
-                    $task->updateIndex('idstatus', 2);
-                }
-                else
-                {
-                    $task->updateIndex('idstatus', 1);
-                }
 
-                header("Location: /all-tasks");
-            }
-        }
-        else
-        {
-            echo "Nenhum item selecionado";
+            break;
+
+            case isset($_POST["destask"]) && isset($_POST["idtask"]):
+
+                // atualiza os dados da tarefa
+                $task->__set('iduser', $_SESSION[User::SESSION]["iduser"]);
+                $task->__set('idtask', $_POST['idtask']);
+                $task->updateIndex('destask', $_POST['destask']);
+
+            break;
         }
     }
 
-    public function selectTasks($status = NULL)
+    // controle da rota pending-tasks
+    public function pendingTasks()
+    {
+        // seleciona todas as tarefas pendentes
+        if (count($this->selectTasks('pendente')) === 0)
+        {
+            $dataTasks = 'empty';
+        } 
+        else
+        {
+            $dataTasks = $this->selectTasks('pendente');
+        }
+
+        return $dataTasks;
+    }
+
+    // controle da rota new-tasks
+    public function newTask()
+    {
+        if (isset($_POST['task']) && $_POST['task'] === '')
+        {
+            Controller::setError("Digite alguma coisa");
+        }
+        else
+        {
+            // inserir
+            $task = new Task();
+            $task->__set('iduser', $_SESSION[User::SESSION]["iduser"]);       
+            $task->__set('destask', $_POST['task']);
+
+            if (isset($_POST['task-done']) && $_POST['task-done'] === 'on')
+            {
+                $task->__set('idstatus', 2);
+            }
+            else 
+            {
+                $task->__set('idstatus', 1);
+            }
+
+            if (!$task->insert())
+            {
+                Controller::setSuccess("Tarefa inserida com sucesso");
+            }
+            else
+            {
+                Controller::setError("Erro ao inserir tarefa");
+            }
+        }
+    }
+
+    // controle da rota all-tasks
+    public function allTasks()
+    {
+        // seleciona todas as tarefas pendentes
+        if (count($this->selectTasks()) === 0)
+        {
+            $dataTasks = 'empty';
+        } 
+        else
+        {
+            $dataTasks = $this->selectTasks();
+        }
+
+        return $dataTasks;
+    }
+
+    // seleciona as tarefas de acordo com o status passado
+    public function selectTasks($status = 'all')
     {
         $task = new Task();
-        $task->__set('iduser', $_SESSION['id']);
+        $task->__set('iduser', $_SESSION[User::SESSION]['iduser']);
 
-        if ($_SERVER["REQUEST_URI"] === '/application')
-        {
-            return $task->selectStatus($status);
-        }
-        else if ($_SERVER["REQUEST_URI"] === '/all-tasks')
-        {
-            return $task->select();
-        }
-   
+        // seleciona todas as tarefas pendentes
+        return $task->selectStatus($status);
     }   
 
-    public function updateTask($idtask, $destask)
-    {
-        $task = new Task();
-        $task->__set('iduser', $_SESSION['id']);
-        $task->__set('idtask', $idtask);
-        $task->updateIndex('destask', $destask);
-    }
-
-    public function insertTask()
-    {
-        if (isset($_POST['task']) && $_POST['task'] === '')
-        {
-            header("Location: /new-task?msg=warning");
-        }
-        else
-        {
-            // inserir
-            $task = new Task();
-
-            $task->__set('iduser', $_SESSION['id']);       
-            $task->__set('destask', $_POST['task']);
-
-            if (isset($_POST['task-done']) && $_POST['task-done'] === 'on')
-            {
-                $task->__set('idstatus', 2);
-            }
-            else 
-            {
-                $task->__set('idstatus', 1);
-            }
-            
-            $task->insert();
-            header("Location: /new-task?msg=success");
-        }
-    }
-
-    public function deleteTask()
-    {
-        if (isset($_POST['task']) && $_POST['task'] === '')
-        {
-            header("Location: /new-task?msg=warning");
-        }
-        else
-        {
-            // inserir
-            $task = new Task();
-
-            $task->__set('iduser', $_SESSION['id']);       
-            $task->__set('destask', $_POST['task']);
-
-            if (isset($_POST['task-done']) && $_POST['task-done'] === 'on')
-            {
-                $task->__set('idstatus', 2);
-            }
-            else 
-            {
-                $task->__set('idstatus', 1);
-            }
-            
-            $task->insert();
-            header("Location: /new-task?msg=success");
-        }
-    }
-
-    public function selectUser()
-    {
-        $iduser = $_SESSION['id'];
-        $user = new User();
-        return $user->listAll($iduser);
-
-    }
 }

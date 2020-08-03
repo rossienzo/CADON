@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Exception;
+use Src\Database\Sql;
+use Src\Application\Model;
 
-use \Src\Database;
-use Src\Database\Connection;
-
-class Image extends User
+class Image extends Model
 {
     private $iduser;
     private $imgname;
@@ -14,157 +14,196 @@ class Image extends User
     private $imgtype;
     private $imgtmp;
 
-    public function __set($attrib, $value)
-    {
-        return $this->$attrib = $value;
-    }
+    const ERROR = "ImageError";
+	const ERROR_REGISTER = "ImageErrorRegister";
+    const SUCCESS = "ImageSucesss";
 
-    public function __get($attrib)
+    const BASE_UPLOAD_DIR = 'res/admin/dist/img/perfil-update/'; // diretório base onde sera feito o upload
+    const EXT_TYPE = array('jpg','jpe','jpeg','png'); // array contendo as extensões permitidas
+    const LIMIT_SIZE = 80000; // tamanho máximo permitido em bytes
+    const FILENAME_MAX_SIZE = 80; // quantidade de caracteres permitido no nome
+    
+    public function select()
     {
-        return $this->$attrib;
-    }
-
-    public function userPerfilImage($id)
-    {
-        $result = $this->countAll('tb_users_perfils_images', $id);
-        $imgurl = '../res/admin/dist/img/user2-160x160.jpg';
-
-        if ($result['count'] > 0)
-        {
-            $results = $this->selectIndex($id);
-            $imgurl = '../res/admin/dist/img/perfil-update/' . $results['imgname'];
-            return $imgurl;
-        }
-        else
-        {
-            return $imgurl;
-        }
-    }
-
-    public function updateImg($files)
-    {
-        if ($files != '')
-        {
-            // salva os dados vindo da super global $_FILES
-            
-            $filename = $files['name'];
-            $filetype = $files['type'];
-            $filetmpname = $files['tmp_name'];
-            $filesize = $files['size'];
+        $sql = "SELECT * FROM tb_users_perfils_images WHERE iduser = :IDUSER";
         
-            if ($filename != "")
-            {
+        $conn = new Sql();
+        $results = $conn->select($sql, array(
+            ':IDUSER' => $this->__get('iduser')
+        ));
 
-            $imgtype = strtolower(substr($filetype, 0, 5)); // verifica se na extenção possui o tipo 'image'
-            
-                if ($filetype != "" && $imgtype == 'image')
-                {
-
-                    $extension = strtolower(str_replace('image/', '', $filetype)); // pega a extenção do arquivo
-
-                    if ($filetmpname != "")
-                    {
-                        if ($filesize != "")
-                        {
-                            
-                            $dir = 'res/admin/dist/img/perfil-update/'; // diretorio onde sera feito o upload
-
-                            $imgnewname = time() . '.' . $extension;
-                            $id = $this->__set('iduser', $_SESSION['id']);
-                            $this->__set('imgname', $imgnewname);
-                            $this->__set('imgtype', $filetype);
-                            $this->__set('imgtmp', $filetmpname);
-                            $this->__set('imgsize', $filesize);
-
-                            if (is_dir($dir))
-                            {
-                                move_uploaded_file($filetmpname, $dir . $imgnewname); // move o arquivo para o novo diretorio
-                            }
-                            else
-                            {
-                                mkdir($dir);
-                                move_uploaded_file($filetmpname, $dir . $imgnewname); // move o arquivo para o novo diretorio
-                            }
-                            
-                            $this->insertOrUpdateImg('tb_users_perfils_images', $id);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public function insertOrUpdateImg($tbname, $id)
-    {
-        $result = $this->countAll($tbname, $id);
-
-        if ($result['count'] > 0)
-        {
-            $this->updateImgUser( $this->__get('iduser'), 
-                                  $this->__get('imgname'), 
-                                  $this->__get('imgtype'), 
-                                  $this->__get('imgtmp'), 
-                                  $this->__get('imgsize'));
-        }
-        else
-        {
-            $this->insertImgUser( $this->__get('iduser'), 
-                                  $this->__get('imgname'), 
-                                  $this->__get('imgtype'), 
-                                  $this->__get('imgtmp'), 
-                                  $this->__get('imgsize'));
-        }
-    }
-
-    public function selectIndex($id)
-    {
-        $sql = "SELECT imgname FROM tb_users_perfils_images WHERE iduser = :IDUSER";
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':IDUSER', $id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        return $results[0];
+        return $results;
     }
 
     /**
      * Faz o insert de uma imagem na tabela
      */
-    public function insertImgUser($iduser, $imgname, $imgtype, $imgtmp, $imgsize)
+    public function insertImgUser()
     {
         $sql = "INSERT INTO tb_users_perfils_images (iduser, imgname, imgsize, imgtype, imgtmp)
                 VALUES (:IDUSER, :IMGNAME, :IMGSIZE, :IMGTYPE, :IMGTMP)";
         
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':IDUSER', $iduser);
-        $stmt->bindParam(':IMGNAME', $imgname);
-        $stmt->bindParam(':IMGSIZE', $imgsize);
-        $stmt->bindParam(':IMGTYPE', $imgtype);
-        $stmt->bindParam(':IMGTMP', $imgtmp);
-        $stmt->execute();
+        $conn = new Sql();
+        $conn->query($sql, array(
+            ':IDUSER' => $this->__get('iduser'),
+            ':IMGNAME' => $this->__get('imgname'), 
+            ':IMGSIZE' => $this->__get('imgsize'),
+            ':IMGTYPE' => $this->__get('imgtype'),
+            ':IMGTMP' => $this->__get('imgtmp')
+        ));
     }
 
     /**
      * Faz o update de uma foto na tabela
      */
-    public function updateImgUser($iduser, $imgname, $imgtype, $imgtmp, $imgsize)
+    public function updateImgUser()
     {
         $sql = "UPDATE tb_users_perfils_images SET 
-            imgname = :IMGNAME,
-            imgsize = :IMGSIZE, 
-            imgtype = :IMGTYPE,
-            imgtmp  = :IMGTMP
+                imgname = :IMGNAME,
+                imgsize = :IMGSIZE, 
+                imgtype = :IMGTYPE,
+                imgtmp  = :IMGTMP
                 WHERE iduser = :IDUSER";
         
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':IDUSER', $iduser);
-        $stmt->bindParam(':IMGNAME', $imgname);
-        $stmt->bindParam(':IMGSIZE', $imgsize);
-        $stmt->bindParam(':IMGTYPE', $imgtype);
-        $stmt->bindParam(':IMGTMP', $imgtmp);
-        $stmt->execute();
+        $conn = new Sql();
+        $conn->query($sql, array(
+            ':IDUSER' => $this->__get('iduser'),
+            ':IMGNAME' => $this->__get('imgname'), 
+            ':IMGSIZE' => $this->__get('imgsize'),
+            ':IMGTYPE' => $this->__get('imgtype'),
+            ':IMGTMP' => $this->__get('imgtmp')
+        ));
     }
+
+
+
+    // Faz o insert ou o update da imagem no BD e envia ou apaga o arquivo da pasta upload
+    public function insertOrUpdateImg($files)
+    {
+        $results = $this->select();
+
+        if (count($results) > 0)
+        {
+            // faz o upload do arquivo para a pasta
+            if ($data = $this->uploadImg($files))
+            {
+                // faz o set automatico do array passado da função uploadImg
+                $this->setData($data);
+
+                // remove o arquivo antigo contido na pasta upload
+                unlink(Image::BASE_UPLOAD_DIR . $results[0]["imgname"]);
+                $this->updateImgUser();
+
+                return true;
+            }
+            else
+            {
+                throw new \Exception("Erro ao atualizar a imagem. Contate do administrador do site.");
+            }
+        }
+        else
+        {
+            // faz o upload do arquivo para a pasta
+            if ($data = $this->uploadImg($files))
+            {
+                // faz o set automatico do array passado da função uploadImg
+                $this->setData($data);
+
+                // faz a inserção do arquivo no BD
+                $this->insertImgUser();
+
+                return true;
+            }
+            else
+            {
+                throw new \Exception("Erro ao enviar a imagem. Contate do administrador do site.");
+            }
+        }
+    }
+
+    // carrega a imagem de perfil de usuário
+    public function userPerfilImage($id)
+    {
+        $this->__set('iduser', $id);
+        $results = $this->select();
+        
+        $imgurl = '../res/admin/dist/img/user2-160x160.jpg';
+        
+        if (count($results)  > 0)
+        {
+            //$imgname = $this->selectIndex($id);
+            $imgurl = '../res/admin/dist/img/perfil-update/' . $results[0]['imgname'];
+            return $imgurl;
+        }
+        else
+        {
+            return $imgurl;
+        }
+    }
+
+    // Faz upload de um arquivo para a pasta BASE_UPLOAD_DIR
+    public function uploadImg($files)
+    {
+        $filename = str_replace(" ", '-', $files["name"]);
+        $filetype = str_replace("image/", '', $files["type"]);
+        $filenametmp = $files["tmp_name"];
+        $filesize = $files["size"];
+        $extension = strtolower(str_replace('image/', '', $filetype)); // pega a extenção do arquivo
+        $imgnewname = time() . '.' . $extension; // renomeia o arquivo
+
+        // Início do tratamento de Exceções
+
+        if (strlen($filename) > Image::FILENAME_MAX_SIZE) // verifica se o nome do arquivo excede 40 caracteres
+        {
+            throw new Exception("O nome do arquivo excede o limite de caracteres");
+        }
+
+        if (!in_array($filetype, Image::EXT_TYPE)) // compara se não existe a extenção no array
+        {
+            throw new Exception("Este arquivo não é válido");
+        }
+
+        
+        if ($filesize > Image::LIMIT_SIZE) // se o tamanho exceder 80 KBs
+        {
+            throw new Exception("O tamanho do arquivo excede o limite " . Image::LIMIT_SIZE . " Bytes");
+        }
+        
+        // Fim do tratamento de Exceções
+
+        if($this->moveUploadFile(Image::BASE_UPLOAD_DIR, $filenametmp, $imgnewname))
+        {
+            // envia os dados para ser passado por meio do setData
+            $data = array(
+                'imgname' => $imgnewname,
+                'imgsize'=> $filesize,
+                'imgtype'=> $filetype,
+                'imgtmp'=> $filenametmp
+            );
+
+            // retorna o array
+            return $data;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // função que envia o arquivo para a pasta upload
+    public function moveUploadFile($dir, $filenametmp, $imgname)
+    {
+        $destination = $dir . $imgname;
+
+        if (is_dir($dir))
+        {
+            return move_uploaded_file($filenametmp, $destination); // move o arquivo para o novo diretorio e retorna true or false
+        }
+        else
+        {
+            mkdir($dir);
+            return move_uploaded_file($filenametmp, $destination); // move o arquivo para o novo diretorio e retorna true or false
+        }
+    }
+
 }

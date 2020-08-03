@@ -1,7 +1,3 @@
-
-
-  
-
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -25,73 +21,101 @@
     <!-- Main content -->
     <div class="content">
       <div class="container">
-        <div class="text-center ">
-            <div class="perfil-image">
-              
-                <img src="{$userphoto}" class="img-circle elevation-2" alt="User Image">
+        <div id="profile-group" class="text-center">
+            {if="$error != ''"}
+            <div class="alert alert-warning">
+                {$error}
             </div>
+            {/if}
+
+            {if="$success != ''"}
+            <div class="alert alert-success">
+                {$success}
+            </div>
+            {/if}
+            <div class="perfil-image">
+                <img src="{$user['perfilImage']}" class="img-circle elevation-2" alt="User Image">
+            </div>
+
             <div class="perfil-image mt-1">
-              <form action="/admin/perfil/edit" enctype="multipart/form-data"  method="POST">
+              <form action="/admin/perfil" enctype="multipart/form-data"  method="POST">
                 <input type="file" name="image" />
-                <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                <button id="btnUploadImage" type="submit" class="btn btn-primary mb-2">Enviar</button>
               </form>
             </div>
+
             <div class="perfil-info mt-3">
                 <small >Nome</small>
-                <a id="perfil-name" href="#" class=""><h3>{$user['desname']}</h3></a>
+                <a id="perfilDesname" class=""><h3>{if="$user['desname'] == ''"} Nenhum dado informado {else} {$user['desname']} {/if}</h3></a>
                 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formDesname" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input class="" id="perfil-name-input" type="text" name="desname"  max-width="30px" value="{$user['desname']}"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-name-input" type="text" name="desname"  max-width="30px" value="{$user['desname']}"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Sobrenome</small>
-                <a href="#" class=""><h3>{$user['deslastname']}</h3></a>
+                {if="$user['deslastname'] == ''"}
+                <a id="perfilDeslastname"  class="text-secondary">
+                  <h3> Nenhum dado informado  </h3>
+                </a>
+                {else}
+                <a id="perfilDeslastname"  class="">
+                  <h3> {$user['deslastname']}  </h3>
+                </a> 
+                {/if}
             
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formDeslastname" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="deslastname" max-width="30px" value="{$user['deslastname']}"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-lastname" type="text" name="deslastname" max-width="30px" value="{$user['deslastname']}"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Telefone</small>
-                <a href="#" class=""><h3>{$user['usphone']}</h3></a>
+                <a id="perfilUsphone" class=""><h3>{if="$user['usphone'] == ''"} Nenhum dado informado {else} {$user['usphone']} {/if}</h3></a>
 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formUsphone" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="usphone" max-width="30px" value="{$user['usphone']}"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-phone" type="phone" name="usphone" max-width="30px" value="{$user['usphone']}"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Endereço</small>
-                <a href="#" class=""><h3>{$user['usaddress']}</h3></a>
+                {if="$user['usaddress'] == ''"}
+                <a id="perfilUsaddress"  class="text-secondary">
+                  <h3> Nenhum dado informado  </h3>
+                </a>
+                {else}
+                <a id="perfilUsaddress"  class="">
+                  <h3> {$user['usaddress']}  </h3>
+                </a> 
+                {/if}
 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formUsaddress" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="usaddress" max-width="30px" value="{$user['usaddress']}"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-address" type="text" name="usaddress" max-width="30px" value="{$user['usaddress']}"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Email</small>
-                <a href="#" class=""><h3>{$user['usemail']}</h3></a>
+                <a id="perfilUsemail" class=""><h3>{if="$user['usemail'] == ''"} Nenhum dado informado {else} {$user['usemail']} {/if}</h3></a>
 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formUsemail" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="usemail" max-width="30px" value="{$user['usemail']}"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-email" type="text" name="usemail" max-width="30px" value="{$user['usemail']}"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>

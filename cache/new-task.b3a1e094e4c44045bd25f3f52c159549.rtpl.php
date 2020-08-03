@@ -5,7 +5,7 @@
           <div class="col-md-3 menu">
             <ul class="list-group shadow-sm">
               <li class="list-group-item disabled"><?php echo htmlspecialchars( $user['desname'], ENT_COMPAT, 'UTF-8', FALSE ); ?></li>
-              <li class="list-group-item"><a href="/application" class="">Tarefas pendentes</a></li>
+              <li class="list-group-item"><a href="/pending-tasks" class="">Tarefas pendentes</a></li>
               <li class="list-group-item active"><a href="/new-task">Nova tarefa</a></li>
               <li class="list-group-item"><a href="/all-tasks">Todas as tarefas</a></li>
               
@@ -13,17 +13,18 @@
           </div>
 
           <div class="col-md-9 shadow-sm text-justify list-itens">
-            <?php if( $msg != '' && $msg == 'success' ){ ?>
-            <div class="form-group bg-success text-white text-center pt-2 pb-2">
-              <span>Tarefa salva com sucesso!</span>
-            </div>
-            <?php } ?>
 
-            <?php if( $msg != '' && $msg == 'warning' ){ ?>
-            <div class="form-group bg-warning text-white text-center pt-2 pb-2">
-              <span>Digite alguma tarefa</span>
+            <?php if( $error != '' ){ ?>
+            <div class="alert alert-warning">
+                <?php echo htmlspecialchars( $error, ENT_COMPAT, 'UTF-8', FALSE ); ?>
             </div>
             <?php } ?>
+            
+            <?php if( $success != '' ){ ?>
+            <div class="alert alert-success">
+                <?php echo htmlspecialchars( $success, ENT_COMPAT, 'UTF-8', FALSE ); ?>
+            </div>
+            <?php } ?> 
 
             <h3>Nova Tarefa</h3>
             <hr />

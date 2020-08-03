@@ -87,7 +87,6 @@ class Mailer {
 
 	public function send()
 	{
-
 		return $this->mail->send();
 	}
 

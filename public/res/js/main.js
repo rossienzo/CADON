@@ -1,6 +1,13 @@
 //Script
 $(document).ready(function() {
  
+    /**
+     * Index 
+     */
+
+    $(document).on('click', 'ul li', function () {  
+       $(this).addClass('active').removeClass('active');
+    });
 
     /***********************
      *** Page - Index ******
@@ -22,12 +29,31 @@ $(document).ready(function() {
         $("html, body").animate({ scrollTop: 0 }, "slow");
     });
 
+
     /***********************
-     *** App - Tarefas Pendentes ******
-    * - Button edit
+     *** Page - recover-password ******
+    * - Timer ao atualizar a senha
     */
 
-   
+    // verifica se o id existe
+    if ($("#timer").length)
+    { 
+        let boldTimer =  document.getElementById("timer");
+        var counter = 3;
+        boldTimer.innerHTML =  "3";
+        var interval = setInterval(function() {
+
+            counter--;
+            boldTimer.innerHTML =  counter;
+            // Display 'counter' wherever you want to display it.
+            if (counter == 0) {
+                // Display a login box
+                clearInterval(interval);
+                boldTimer.innerHTML =  "0";
+            }
+        }, 1000);
+    }
+  
 
     /***********************
      *** App - Tarefas Pendentes ******
@@ -47,12 +73,13 @@ $(document).ready(function() {
     }
     catch (err)
     {
-        console.log('');
+        //console.log('');
     }
     
     
 
-    function dtRegeisterDisplay() {
+    function dtRegeisterDisplay() 
+    {
        
         dtRegister = this.children[2] // pega o atributo small
         
@@ -65,14 +92,26 @@ $(document).ready(function() {
         }
     }
 
-    
-
-/**
- * Admin/Perfil
- */
-
 });
 
+/**
+ * Index functions
+ */
+
+
+// forgot-password on send email 
+// => Timer
+
+function myTimer() {
+  var d = new Date();
+  document.getElementById("timer").innerHTML = d.toLocaleTimeString();
+}
+
+
+
+/**
+ * Application functions
+ */
 
 // #Functions# \\
 

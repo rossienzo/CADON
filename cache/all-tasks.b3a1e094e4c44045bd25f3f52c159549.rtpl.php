@@ -5,7 +5,7 @@
           <div class="col-md-3 menu">
             <ul class="list-group shadow-sm">
               <li class="list-group-item disabled"><?php echo htmlspecialchars( $user['desname'], ENT_COMPAT, 'UTF-8', FALSE ); ?></li>
-              <li class="list-group-item"><a href="/application" class="">Tarefas pendentes</a></li>
+              <li class="list-group-item"><a href="/pending-tasks" class="">Tarefas pendentes</a></li>
               <li class="list-group-item"><a href="/new-task">Nova tarefa</a></li>
               <li class="list-group-item active"><a href="/all-tasks">Todas as tarefas</a></li>
               
@@ -16,7 +16,7 @@
             <h3>Todas as Tarefas</h3>
             <hr />
             <?php if( $tasks === 'empty' ){ ?>
-            <div class="form-group bg-warning text-white text-center pt-2 pb-2">
+            <div class="form-group alert alert-warning text-center pt-2 pb-2">
               <span>Não há nenhuma tarefa salva</span>
             </div>
             <?php } ?>
@@ -55,25 +55,22 @@
                   <td>
 
                     <form action="/all-tasks?id=<?php echo htmlspecialchars( $value1["idtask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>?task=<?php echo htmlspecialchars( $value1["destask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>?status=<?php echo htmlspecialchars( $value1["status"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" method="POST">
-                      <?php if( $value1["status"] == 'realizado' ){ ?>
-                      
-                      <button type="submit" name="confirm" class="btn">
+
+                      <button type="submit" name="confirm" value="<?php echo htmlspecialchars( $value1["idtask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>&<?php echo htmlspecialchars( $value1["status"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="btn">
                         <i class="fas fa-check-square fa-lg text-success"></i>
                       </button>
 
-                      <button type="submit" name="delete" class="btn">
+                      <?php if( $value1["status"] == 'realizado' ){ ?>
+                      <button type="submit" name="delete" value="<?php echo htmlspecialchars( $value1["idtask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="btn">
                         <i class="fas fa-trash-alt fa-lg text-danger"></i>
                       </button>
-                      <?php }else{ ?>
-                      <button type="submit" name="confirm" class="btn">
-                        <i class="fas fa-check-square fa-lg text-success"></i>
-                      </button>
 
+                      <?php }else{ ?>
                       <button type="button" name="edit" onclick="editTask(<?php echo htmlspecialchars( $value1["idtask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>, '<?php echo htmlspecialchars( $value1["destask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>')" class="btn">
                         <i class="fas fa-edit fa-lg text-info"></i>
                       </button>
 
-                      <button type="submit" name="delete" class="btn">
+                      <button type="submit" name="delete" value="<?php echo htmlspecialchars( $value1["idtask"], ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="btn">
                         <i class="fas fa-trash-alt fa-lg text-danger"></i>
                       </button>
                       <?php } ?>

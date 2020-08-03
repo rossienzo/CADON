@@ -26,7 +26,9 @@
     <div class="card-body login-card-body">
       <h4>Email enviado com sucesso!</h4>
       <p class="mt-3 mb-1">
-        <a href="/login">Fazer Login</a>
+        <a href="/login">
+        <button type="button" class="btn btn-outline-success">Fazer Login</button>
+      </a>
       </p>
     </div>
     <!-- /.login-card-body -->

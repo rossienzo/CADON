@@ -1,4 +1,5 @@
 <?php
+  session_start();
 
   use Src\Application\Route;
   use App\Models\Image;

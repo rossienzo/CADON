@@ -17,7 +17,7 @@ final class Connection
     }
     
     /**
-     * Recebe o nome do conector de BD e instancia o objeto PDO
+     * Recebe o nome do conector de BD e instancia o objeto PDO (O nome do arquivo de configuração)
      */
     public static function open($name)
     {

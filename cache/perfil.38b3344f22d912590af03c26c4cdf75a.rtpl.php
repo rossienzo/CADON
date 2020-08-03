@@ -25,73 +25,101 @@
     <!-- Main content -->
     <div class="content">
       <div class="container">
-        <div class="text-center ">
-            <div class="perfil-image">
-              
-                <img src="<?php echo htmlspecialchars( $userphoto, ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="img-circle elevation-2" alt="User Image">
+        <div id="profile-group" class="text-center">
+            <?php if( $error != '' ){ ?>
+            <div class="alert alert-warning">
+                <?php echo htmlspecialchars( $error, ENT_COMPAT, 'UTF-8', FALSE ); ?>
             </div>
+            <?php } ?>
+
+            <?php if( $success != '' ){ ?>
+            <div class="alert alert-success">
+                <?php echo htmlspecialchars( $success, ENT_COMPAT, 'UTF-8', FALSE ); ?>
+            </div>
+            <?php } ?>
+            <div class="perfil-image">
+                <img src="<?php echo htmlspecialchars( $user['perfilImage'], ENT_COMPAT, 'UTF-8', FALSE ); ?>" class="img-circle elevation-2" alt="User Image">
+            </div>
+
             <div class="perfil-image mt-1">
-              <form action="/admin/perfil/edit" enctype="multipart/form-data"  method="POST">
+              <form action="/admin/perfil" enctype="multipart/form-data"  method="POST">
                 <input type="file" name="image" />
-                <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                <button id="btnUploadImage" type="submit" class="btn btn-primary mb-2">Enviar</button>
               </form>
             </div>
+
             <div class="perfil-info mt-3">
                 <small >Nome</small>
-                <a id="perfil-name" href="#" class=""><h3><?php echo htmlspecialchars( $user['desname'], ENT_COMPAT, 'UTF-8', FALSE ); ?></h3></a>
+                <a id="perfilDesname" class=""><h3><?php if( $user['desname'] == '' ){ ?> Nenhum dado informado <?php }else{ ?> <?php echo htmlspecialchars( $user['desname'], ENT_COMPAT, 'UTF-8', FALSE ); ?> <?php } ?></h3></a>
                 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formDesname" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input class="" id="perfil-name-input" type="text" name="desname"  max-width="30px" value="<?php echo htmlspecialchars( $user['desname'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-name-input" type="text" name="desname"  max-width="30px" value="<?php echo htmlspecialchars( $user['desname'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Sobrenome</small>
-                <a href="#" class=""><h3><?php echo htmlspecialchars( $user['deslastname'], ENT_COMPAT, 'UTF-8', FALSE ); ?></h3></a>
+                <?php if( $user['deslastname'] == '' ){ ?>
+                <a id="perfilDeslastname"  class="text-secondary">
+                  <h3> Nenhum dado informado  </h3>
+                </a>
+                <?php }else{ ?>
+                <a id="perfilDeslastname"  class="">
+                  <h3> <?php echo htmlspecialchars( $user['deslastname'], ENT_COMPAT, 'UTF-8', FALSE ); ?>  </h3>
+                </a> 
+                <?php } ?>
             
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formDeslastname" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="deslastname" max-width="30px" value="<?php echo htmlspecialchars( $user['deslastname'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-lastname" type="text" name="deslastname" max-width="30px" value="<?php echo htmlspecialchars( $user['deslastname'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Telefone</small>
-                <a href="#" class=""><h3><?php echo htmlspecialchars( $user['usphone'], ENT_COMPAT, 'UTF-8', FALSE ); ?></h3></a>
+                <a id="perfilUsphone" class=""><h3><?php if( $user['usphone'] == '' ){ ?> Nenhum dado informado <?php }else{ ?> <?php echo htmlspecialchars( $user['usphone'], ENT_COMPAT, 'UTF-8', FALSE ); ?> <?php } ?></h3></a>
 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formUsphone" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="usphone" max-width="30px" value="<?php echo htmlspecialchars( $user['usphone'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-phone" type="phone" name="usphone" max-width="30px" value="<?php echo htmlspecialchars( $user['usphone'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Endereço</small>
-                <a href="#" class=""><h3><?php echo htmlspecialchars( $user['usaddress'], ENT_COMPAT, 'UTF-8', FALSE ); ?></h3></a>
+                <?php if( $user['usaddress'] == '' ){ ?>
+                <a id="perfilUsaddress"  class="text-secondary">
+                  <h3> Nenhum dado informado  </h3>
+                </a>
+                <?php }else{ ?>
+                <a id="perfilUsaddress"  class="">
+                  <h3> <?php echo htmlspecialchars( $user['usaddress'], ENT_COMPAT, 'UTF-8', FALSE ); ?>  </h3>
+                </a> 
+                <?php } ?>
 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formUsaddress" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="usaddress" max-width="30px" value="<?php echo htmlspecialchars( $user['usaddress'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-address" type="text" name="usaddress" max-width="30px" value="<?php echo htmlspecialchars( $user['usaddress'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>
             <hr />
             <div class="perfil-info mt-3">
                 <small >Email</small>
-                <a href="#" class=""><h3><?php echo htmlspecialchars( $user['usemail'], ENT_COMPAT, 'UTF-8', FALSE ); ?></h3></a>
+                <a id="perfilUsemail" class=""><h3><?php if( $user['usemail'] == '' ){ ?> Nenhum dado informado <?php }else{ ?> <?php echo htmlspecialchars( $user['usemail'], ENT_COMPAT, 'UTF-8', FALSE ); ?> <?php } ?></h3></a>
 
-                <form action="/admin/perfil/edit" method="POST" class="">
+                <form id="formUsemail" action="/admin/perfil" style="display: none;" method="POST" class="">
                   <div class="form-group mb-2">
-                    <input id="perfil-lastname" type="text" name="usemail" max-width="30px" value="<?php echo htmlspecialchars( $user['usemail'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
-                    <button type="submit" class="btn btn-primary mb-2">Ok</button>
+                    <input class="input-text-size" id="perfil-email" type="text" name="usemail" max-width="30px" value="<?php echo htmlspecialchars( $user['usemail'], ENT_COMPAT, 'UTF-8', FALSE ); ?>"/>
+                    <button type="submit" class="btn btn-outline-secondary">Ok</button>
                   </div>
                 </form>
             </div>

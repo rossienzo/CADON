@@ -9,138 +9,144 @@ class IndexController extends Controller
 {
     const SESSION_ERROR = "AddressError";
 
-    public function authentication($email, $password)
+    public function userLogin($login, $password)
     {
-        /**
-         * utiliza a função userExist para verificar se o usuario existe e 
-         * salva os dados referentes a id e name 
-         */
         $user = new User();
-        $user->__set('email', $email);
-        $user->__set('password', $password);
+
+        try {
+
+            $user->login($login, $password);
         
-        $results = $user->userExist($user->__get('email'), $user->__get('password'));
-        $id = $results['iduser'];
-        $name = $results['desname'];
-        $lastname = $results['deslastname'];
-        $status = $results['usstatus'];
-
-        if ($results)
-        {
-            if ($results['iduser'] =! '' || $results['desname'] = '' || $results['deslastname'] = '')
-            {
-                $user->__set('id', $id);
-                $user->__set('name', $name);
-                $user->__set('lastname', $lastname);
-                $user->__set('status', $status);
-                
-                if ($user->__get('id') != '' || $user->__get('desname') != '')
-                {
-                    session_start();
-
-                    // Salva o usuario na sessão
-                    $_SESSION['id'] = $user->__get('id');
-                    $_SESSION['name'] = $user->__get('name');
-                    $_SESSION['lastname'] = $user->__get('lastname');
-                    $_SESSION['status'] = $user->__get('status');
-                    
-                    if ($status === '1')
-                    {
-                        
-                        header("Location: /application");
-                    }
-                    else
-                    {
-                        header("Location: /admin");
-                    }
-                }
-            }
-        }
-        else
-        {
-            header("Location: /login?msg=error");
-        }
+          } catch (\Exception $e) {
+        
+            Controller::setError($e->getMessage());
+          }
         
     }
 
     // registra o usuário no banco
-    public function userRegister()
+    public function register()
     {
-
-        if( !isset($_POST['name']) || $_POST['name'] === '' || strlen($_POST['name']) < 3)
-        {
-
-        }
-
-        if (!isset($_POST['lastname']) || $_POST['lastname'] === '' || strlen($_POST['lastname']) < 3)
-        {
-                
-                    
-        }
-
-        if (!isset($_POST['email']) || $_POST['email'] === '' || filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))
-        {
-
-        }
-
-        if (!isset($_POST['password']) || !isset($_POST['password']) === '' || strlen($_POST['password']) > 6)
-        {
-                        
-        }
-
-        if (!isset($_POST['re-password']) || $_POST['re-password'] === '' ||  $_POST['re-password'] != $_POST['password'])
-        {
-                            
-        }
-
-        if (!isset($_POST['terms']) || $_POST['terms'] === "")
-        {
-        
-        }
-
+        $user = new User();
         try
         {
-            $user = new User();
+            // Campo nome vazio
+            if( !isset($_POST['name']) || $_POST['name'] === '')
+            {
+                throw new \Exception("Digite algum nome", 100);
+            }
 
-            $user->__set('name', strtolower($_POST['name']));
-            $user->__set('lastname', strtolower($_POST['lastname']));
-            $user->__set('phone', '');
+            // Campo nome com poucos caracteres
+            else if (strlen($_POST["name"]) < 3)
+            {
+                throw new \Exception("Digite um nome maior", 101);
+            }
+
+            /* Atualmente o campo sobrenome está como opcional
+            // Campo sobrenome vazio
+            else if( !isset($_POST["lastname"]) || $_POST["lastname"] === '')
+            {
+                throw new \Exception("Digite algum sobrenome",102);
+            }
+
+            // Campo sobrenome com poucos caracteres
+            else if (strlen($_POST["lastname"]) < 3)
+            {
+                throw new \Exception("Digite um sobrenome maior", 103);
+            }
+            */
+
+            // Campo nome de usuário vazio ou com poucos caracteres
+            else if( !isset($_POST["username"]) || $_POST["username"] === '' || strlen($_POST['username']) < 4)
+            {
+                throw new \Exception("Digite um nome de usuário com mais de 4 digitos", 104);
+            }
+
+            // Usuário já cadastrado
+            else if ($user->userExist("ususername" , $_POST["username"]) )
+            {
+                throw new \Exception("Nome de usuário já cadastrado", 105);
+            }
+
+            // Email com caracteres indevidos
+            else if (!$user->emailValidation($_POST["email"])) // ! negação se o email for verdadeiro
+            {
+                throw new \Exception("Email inválido", 106);
+            }
+
+            // Email já cadastrado
+            else if ($user->userExist("usemail" , $_POST["email"]))
+            {
+                throw new \Exception("Email já cadastrado", 107);
+            }
+
+            // Campo senha Vazio ou com poucos caracteres
+            else if( !isset($_POST["password"]) || $_POST["password"] === '' || strlen($_POST["password"]) < 6)
+            {
+                throw new \Exception("Digite uma senha com 6 ou mais digitos", 108);
+            }
+
+            // As senha não são iguais
+            else if( !isset($_POST["repassword"]) || $_POST['repassword'] != $_POST['password'])
+            {
+                throw new \Exception("As senhas não são iguais", 109);
+            }
+
+            // Termos não aceito
+            else if (!isset($_POST['terms']) || $_POST['terms'] === "")
+            {
+                throw new \Exception("Você precisa aceitar os termos para prosseguir", 110);
+            }
+
+            // Termos não aceito
+            else if (!$user->phoneValidation($_POST["phone"]))
+            {
+                throw new \Exception("Você precisa aceitar os termos para prosseguir", 111);
+            }
+
+            $user->__set('name', strtolower($_POST["name"]));
+            $user->__set('lastname', strtolower($_POST["lastname"]));
+            $user->__set('phone', $user->phoneValidation($_POST["phone"]));
             $user->__set('address', '');
-            $user->__set('username', '');
+            $user->__set('username', $_POST["username"]);
             $user->__set('email', $_POST['email']);
             $user->__set('password', $_POST['password']);
-            $user->__set('status', 1);
-            $user->insert();
+            $user->__set('status', 1); // insere como usuário normal
+            
+            if ($user->insert())
+            {
+                Controller::setSuccess("Cadastro realizado com sucesso!");
+            }
 
-            header("Location: /login");
         }
-        catch (\PDOException $e)
+        catch (\Exception $e)
         {
-            $e->getMessage();
+          Controller::setError($e->getMessage());
+          Controller::setErrorRegister($e->getCode());
         }
-                        
+
     }
 
     public function forgotPassword()
     {
         $user = new User();
-
         $user->__set('email', $_POST['email']);
-        //$user->userEmailRecovery($user->__get('email'), false);
-        if ($user->userEmailRecovery($user->__get('email'), false))
+       
+        try
         {
-            
+            return $user->userEmailRecovery($user->__get('email'), false); // retorna true or false
         }
-        else
+        catch (\Exception $e)
         {
-            return FALSE;
+            Controller::setError($e->getMessage());
+            return False;
         }
-        
     }
 
      /**
      * Faz uso da função validForgotDecrypt para decodificar o que foi passado na url
      */
+
     public function validForgotDecrypt()
     {
         if (isset($_GET["code"]))
@@ -161,25 +167,66 @@ class IndexController extends Controller
         {
             header("Location: /login");
         }
-        
     }
-    
+
     /**
      * Faz uso da função resetPassword para adicionar a nova senha de usuário
      */
     public function reset()
     {
         $user = new User();
-        $result = $user->validForgotDecrypt($_POST["code"]);
-        
-        $password = $_POST["password"];
-        $rePassword = $_POST["re-password"];
 
-        if ($password === $rePassword)
+        // verifica se o codigo enviado pela url é valido
+        if (isset($_GET["code"]) && isset($_GET["selector"]) && isset($_GET["iu"]))
         {
-            $user->resetPassword($password, $result['iduser']);
+            // gera o codigo md5 para verificar se o do email é válido
+            $forgotMd5 = $user->generateCode(base64_decode($_GET["iu"]));
+            
+            if ($_GET["code"] === '' || $_GET["iu"] === '' || $_GET["selector"] === '')
+            {
+                header("Location: /login");
+            }
+            else if ($_GET["code"] != $forgotMd5)
+            {
+                header("Location: /login");
+            }
         }
-        
+        // caso enviado a password e a re-password ele irá resetar a senha
+        else if (isset($_POST["password"]) && isset($_POST["re-password"]))
+        {
+            try
+            {
+                $result = $user->validForgotDecrypt($_POST["selector"]);
+
+                $password = $_POST["password"];
+                $repassword = $_POST["re-password"];
+
+                // Campo senha Vazio ou com poucos caracteres
+                if( !isset($password) || $password === '' || strlen($password) < 6)
+                {
+                    throw new \Exception("Digite uma senha com 6 ou mais digitos", 108);
+                }
+
+                // As senha não são iguais
+                else if( !isset($repassword) || $password != $repassword)
+                {
+                    throw new \Exception("As senhas não são iguais", 109);
+                }
+
+                // faz update da nova senha e retorna o boolean
+                return $user->resetPassword($password, $result['iduser']);
+                
+
+            }
+            catch (\Exception $e)
+            {
+                Controller::setError($e->getMessage());
+            }
+        }
+        else
+        {
+            header("Location: /login");
+        }
     }
 
 }

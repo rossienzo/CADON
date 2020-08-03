@@ -1,7 +1,6 @@
 <?php
 
 use Src\Application\Route;
-use App\Models\Image;
 use App\Controllers\AppController;
 
 /*
@@ -10,134 +9,89 @@ use App\Controllers\AppController;
  ************************
  */
 
-Route::add('/application', function(){
+Route::add('/pending-tasks', function(){
 
-    $appController = new AppController();
-    $appController->userAuthValidation();
-    $dataUser = $appController->selectUser();
+    $appc = new AppController();
+    $appc->verifyLogin(false);
+    $dataUser = $appc->getFromSession();
   
-    if (count($appController->selectTasks('pendente')) === 0)
-    {
-      $dataTasks = 'empty';
-    } 
-    else
-    {
-      $dataTasks = $appController->selectTasks('pendente');
-    }
+    $dataTasks = $appc->pendingTasks();
     
-    $appController->assignValues('tasks', $dataTasks);
-    $appController->assignValues('user', $dataUser);
+    $appc->assignValues('tasks', $dataTasks);
+    $appc->assignValues('user', $dataUser);
   
-    $appController->drawView('app/header');
-    $appController->drawView('app/index');
-    $appController->drawView('app/footer');
+    $appc->drawView('app/header');
+    $appc->drawView('app/index');
+    $appc->drawView('app/footer');
   });
   
   
   // Rota que recebe o que vier de atualização
-  Route::add('/application', function(){
+  Route::add('/pending-tasks', function(){
   
-    $appController = new AppController();
-    $appController->userAuthValidation();
-  
-  
-  
-    if (isset($_POST['idtask']) && $_POST['idtask'] != '')
-    {
-      if (isset($_POST['destask']) && $_POST['destask'] != '')
-      {
-        $appController->updateTask($_POST['idtask'], $_POST['destask']);
-        header("Location: /application");
-      } 
-      else
-      {
-        echo "Digite alguma tarefa";
-      }
-      
-    } else
-    {
-      $appController->itemConfig(explode('?', $_SERVER["REQUEST_URI"]));
-    }
-  
+    $appc = new AppController();
+    $appc->verifyLogin(false);
+    
+    $appc->configurationTask();
+    
+    header("Location: /pending-tasks");
+    
   }, 'post');
   
   Route::add('/new-task', function(){
   
-    $appController = new AppController();
-    $appController->userAuthValidation();
-    $dataUser = $appController->selectUser();
-  
-    isset($_GET['msg']) ? $msg = $_GET['msg'] : $msg = '';
-  
-    $appController->assignValues('user', $dataUser);
-    $appController->assignValues('msg', $msg);
-    $appController->drawView('app/header');
-    $appController->drawView('app/new-task');
-    $appController->drawView('app/footer');
+    $appc = new AppController();
+    $appc->verifyLogin(false);
+    $dataUser = $appc->getFromSession();
+
+    $appc->assignValues('error', $appc->getError());
+    $appc->assignValues('success', $appc->getSuccess());
+    $appc->assignValues('user', $dataUser);
+
+    $appc->drawView('app/header');
+    $appc->drawView('app/new-task');
+    $appc->drawView('app/footer');
   });
   
   Route::add('/new-task', function(){
   
-    $appController = new AppController();
-    $appController->userAuthValidation();
+    $appc = new AppController();
+    $appc->verifyLogin(false);
+    
+    $appc->newTask();
   
-    $appController->insertTask();
-  
+    header("Location: /new-task");
   }, 'post');
   
   Route::add('/all-tasks', function(){
   
-    $appController = new AppController();
-    $appController->userAuthValidation();
-    $dataUser = $appController->selectUser();
+    $appc = new AppController();
+    $appc->verifyLogin(false);
+    $dataUser = $appc->getFromSession();
   
-    if (count($appController->selectTasks()) === 0)
-    {
-      $dataTasks = 'empty';
-    } else
-    {
-      $dataTasks = $appController->selectTasks();
-      
-    }
+    $dataTasks = $appc->allTasks();
     
-    
-    $appController->assignValues('tasks', $dataTasks);
-    $appController->assignValues('user', $dataUser);
-    $appController->drawView('app/header');
-    $appController->drawView('app/all-tasks');
-    $appController->drawView('app/footer');
+    $appc->assignValues('tasks', $dataTasks);
+    $appc->assignValues('user', $dataUser);
+    $appc->drawView('app/header');
+    $appc->drawView('app/all-tasks');
+    $appc->drawView('app/footer');
   });
   
   Route::add('/all-tasks', function(){
   
-    $appController = new AppController();
-    $appController->userAuthValidation();
+    $appc = new AppController();
+    $appc->verifyLogin(false);
   
-    if (isset($_POST['idtask']) && $_POST['idtask'] != '')
-    {
-      if (isset($_POST['destask']) && $_POST['destask'] != '')
-      {
-        $appController->updateTask($_POST['idtask'], $_POST['destask']);
-        header("Location: /all-tasks");
-      } 
-      else
-      {
-        echo "Digite alguma tarefa";
-      }
-      
-    } else
-    {
-      $appController->itemConfig(explode('?', $_SERVER["REQUEST_URI"]));
-    }
+    $appc->configurationTask();
+    header("Location: /all-tasks");
     
   }, 'post');
   
-  Route::add('/logoff', function() {
+  Route::add('/logout', function() {
     
-    $appController = new AppController();
-    $appController->userAuthValidation();
-    session_destroy();
+    AppController::logout();
   
-    header("Location: /");
+    header("Location: /login");
   });
 

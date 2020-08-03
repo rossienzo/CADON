@@ -2,11 +2,19 @@
 
 namespace App\Models;
 
-use Src\Database\Connection;
+use Exception;
 use Src\Application\Mailer;
+use Src\Application\Model;
+use Src\Database\Sql;
 
-class User
+class User extends Model
 {
+    const SESSION = "User";
+    const ERROR = "UserError";
+	const ERROR_REGISTER = "UserErrorRegister";
+    const SUCCESS = "UserSucesss";
+    const CODE = "CADONFORGOT";
+
     private $id;
     private $name;
     private $lastname;
@@ -17,155 +25,222 @@ class User
     private $password;
     private $dateRegister;
     private $status;
-    
-    const SESSION = "User";
-	const SECRET = "Secret_code";
+    private $perfilImage;
 
-    public function __set($attrib, $value)
+    public function selectUser()
     {
-        return $this->$attrib = $value;
+        $sql = "SELECT * FROM tb_users";
+
+        $conn = new Sql();
+        return $conn->select($sql);
+    }
+    
+    public function insertUser()
+    {
+        $sql = 'INSERT INTO tb_users (desname, deslastname, usphone, usaddress, ususername, usemail, uspassword, usstatus)
+                VALUES (:DESNAME, :DESLASTNAME, :USPHONE, :USADDRESS, :USUSERNAME, :USEMAIL, :USPASSWORD, :USSTATUS)';
+
+        $conn = new Sql();
+        $conn->query($sql, array(
+            ':DESNAME'=> $this->__get('name'),
+            ':DESLASTNAME'=> $this->__get('lastname'),
+            ':USPHONE'=> $this->__get('phone'),
+            ':USADDRESS'=> $this->__get('address'),
+            ':USUSERNAME'=> $this->__get('username'),
+            ':USEMAIL'=> $this->__get('email'),
+            ':USPASSWORD'=> $this->__get('password'),
+            ':USSTATUS'=> $this->__get('status')
+        ));
     }
 
-    public function __get($attrib)
+    public function listAllFromID($id)
     {
-        return $this->$attrib;
+        $sql = "SELECT * FROM tb_users WHERE iduser = :IDUSER";
+
+        $conn = new Sql();
+        return $conn->select($sql, array(
+            ':IDUSER' => $id
+        ));
     }
 
     // Seleciona todos os usuários menos o usuário logado
     public function selectDifferenceOfLoggedUser($id)
     {
         $sql = "SELECT * FROM tb_users WHERE iduser != :IDUSER";
-        
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':IDUSER', $id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $results;
-    }
 
-    public function listAll($id)
-    {
-        $sql = "SELECT * FROM tb_users WHERE iduser = :ID";
-        
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':ID', $id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $results[0];
+        $conn = new Sql();
+        return $conn->select($sql, array(
+            ':IDUSER' => $id
+        ));
     }
 
     public function insert()
     {
         $sql = 'INSERT INTO tb_users (desname, deslastname, usphone, usaddress, ususername, usemail, uspassword, usstatus)
                 VALUES (:DESNAME, :DESLASTNAME, :USPHONE, :USADDRESS, :USUSERNAME, :USEMAIL, :USPASSWORD, :USSTATUS)';
-        try
-        {
             
-            $name = $this->__get('name');
-            $lastname = $this->__get('lastname');
-            $phone = $this->__get('phone');
-            $address = $this->__get('address');
-            $username = $this->__get('username');
-            $email = $this->__get('email');
-            $password = $this->__get('password');
-            $status = $this->__get('status');
-            
-            $conn = Connection::open('config');
-            $stmt = $conn->prepare($sql);
-
-            $stmt->bindParam(':DESNAME', $name);
-            $stmt->bindParam(':DESLASTNAME', $lastname);
-            $stmt->bindParam(':USPHONE', $phone);
-            $stmt->bindParam(':USADDRESS', $address);
-            $stmt->bindParam(':USUSERNAME', $username);
-            $stmt->bindParam(':USEMAIL', $email);
-            $stmt->bindParam(':USPASSWORD', $password);
-            $stmt->bindParam(':USSTATUS', $status);
-
-            $stmt->execute();
-        }
-        catch (\PDOException $e)
-        {
-            $e->getMessage();
-        }
-
-    }
-    
-    // Conta a quantidade de itens em uma determinada tabela
-    // Classes que a utilizam
-    // - Image
-    public function countAll($tb_name, $id)
-    {
-        $sql = "SELECT count(*) as count FROM " . $tb_name . " WHERE iduser = :ID";
-        
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':ID', $id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $results[0];
+        $conn = new Sql();
+        return $conn->query($sql, array(
+            ':DESNAME'     => $this->__get('name'),
+            ':DESLASTNAME' => $this->__get('lastname'),
+            ':USPHONE'     => $this->__get('phone'),
+            ':USADDRESS'   => $this->__get('address'),
+            ':USUSERNAME'  => $this->__get('username'),
+            ':USEMAIL'     => $this->__get('email'),
+            ':USPASSWORD'  => $this->getPasswordHash($this->__get('password')),
+            ':USSTATUS'    => $this->__get('status')
+        ));
     }
 
     /**
      * Faz o update de um índice da coluna
+     * @param $key recebe o nome da coluna na tabela do banco
      */
-    public function updateIndex($id, $column, $index)
+    public function updateIndex($iduser, $key, $index)
     {
-        $sql = "UPDATE tb_users SET $column = :INDEX 
-        WHERE iduser = :ID";
-        
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
+        $sql = "UPDATE tb_users SET $key = :INDEX 
+        WHERE iduser = :IDUSER";
 
-        $stmt->bindParam(':INDEX', $index);
-        $stmt->bindParam(':ID', $id);        
-        $stmt->execute();
+        $conn = new Sql();
+        
+        // atualiza na sessão o dado
+        $_SESSION[User::SESSION][$key] = $index;
+
+        return $conn->query($sql, array(
+            ':INDEX' => $index,
+            ':IDUSER' => $iduser
+        ));
+        
     }
 
+    public static function login($login, $password)
+	{
+		$sql = new Sql();
+
+        // seleciona na tabela tudo os dados do usuário relacionado ao username
+		$results = $sql->select("SELECT * FROM tb_users WHERE ususername = :LOGIN", array(
+			":LOGIN"=>$login
+		)); 
+
+        // se não encontrar dados referentes ao username irá buscar relacionado ao email
+		if (count($results) === 0)
+		{
+            // seleciona na tabela tudo os dados do usuário relacionado ao seu email
+            $results = $sql->select("SELECT * FROM tb_users WHERE usemail = :LOGIN", array(
+                ":LOGIN"=>$login
+            )); 
+            
+            // se não houver dados retornados o usuário não existe
+            if (count($results) === 0)
+            {
+                throw new \Exception("Usuário inexistente ou senha inválida");
+            }
+        } 
+  
+		$data = $results[0];
+        
+        // a função verifica se o parâmetro é igual ao do BD
+		if (password_verify($password , $data["uspassword"]) === TRUE) // verifica se a senha digitada é igual ao hash salvo no BD
+		{
+            $user = new User();
+            $image = new Image();
+
+			$data["desname"] = utf8_encode($data["desname"]);
+
+            $user->__set('perfilImage', $image->userPerfilImage($data["iduser"]));
+
+            // faz o __set() automatico
+            $user->setData($data);
+
+            // salva todos os dados na sessão
+            $_SESSION[User::SESSION] = $user->getValues();
+            return $user;
+        } 
+        else 
+        {
+			throw new \Exception("Usuário inexistente ou senha inválida");
+		}
+    }
     
+    // Cria um hash da senha para salvar no BD
+    public static function getPasswordHash($password)
+	{
+		return password_hash($password, PASSWORD_DEFAULT, [
+			'cost'=>12
+		]);
+    }
 
-    /**
-     * Verifica se o username e a senha está vinculado a um usuario real
-     */
-    public function userExist($email, $password)
+
+
+    public function phoneValidation($phone)
     {
-        $sql = "SELECT * FROM tb_users WHERE usemail = :USERNAME AND uspassword = :PASSWORD";
+        $phone= trim(str_replace('/', '', str_replace(' ', '', str_replace('-', '', str_replace(')', '', str_replace('(', '', $phone))))));
+    
+        //$phoneCode = "^[0-9]{11}$";
+    
+        //$phoneCode = '/[0-9]{2}[6789][0-9]{3,4}[0-9]{4}/'; // Regex para validar somente celular
 
-        $conn = Connection::open('config');
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':USERNAME', $email);
-        $stmt->bindParam(':PASSWORD', $password);
-        $stmt->execute();
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $regexCode = '/[0-9]{2}[6789][0-9]{3,4}[0-9]{4}/'; // Regex para validar somente celular
 
-        return $result[0];
+        if (preg_match($regexCode, $phone)) 
+        {
+            return $phone;
+        }
+        else
+        {
+            throw new \Exception("Telefone inválido");
+            return false;
+        }
+    }
 
+    public function userExist($clause, $userData)
+    {
+        $sql = "SELECT count(*) as total FROM tb_users WHERE ". $clause . " = :USERDATA";
+
+        $conn = new Sql();
+        $results = $conn->select($sql, array(
+            ':USERDATA' => $userData
+        ));
+        
+
+        if ($results[0]["total"] > 0)
+        {
+            return true; // nome de usuário ou email já existente
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
+
+    public function emailValidation($email)
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            return true; // email válido
+        }
+        else
+        {
+            return false; // email inválido
+        }
     }
 
     // verifica se o usuário está cadastrado e caso esteja envia para o email do usuário o link para atualizar a senha
     public function userEmailRecovery($email, $inadmin = true)
     {
-        $conn = Connection::open('config');
-
         $sql = "SELECT *
                 FROM tb_users a
                 INNER JOIN tb_users b USING(iduser)
                 WHERE a.usemail = :EMAIL";
-
-		$stmt =$conn->prepare($sql);
-        $stmt->bindParam(":EMAIL", $email);
-        $stmt->execute();
-
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $conn = new Sql();
+        $results = $conn->select($sql, array(
+            ":EMAIL" => $email
+        ));
 
 		if (count($results) === 0)
 		{
-            //throw new \Exception("Não foi possível recuperar a senha.");
+            throw new \Exception("Usuário não cadastrado");
             return FALSE;
 		}
 		else
@@ -174,12 +249,10 @@ class User
 
             $sql = "CALL sp_userspasswordsrecoveries_create(:IDUSER, :DESIP)";
 
-            $stmt =$conn->prepare($sql);
-            $stmt->bindParam(":IDUSER", $data["iduser"]);
-            $stmt->bindParam(":DESIP", $_SERVER["REMOTE_ADDR"]);
-            $stmt->execute();
-
-            $results2 = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $results2 = $conn->select($sql, array(
+                ":IDUSER"=> $data["iduser"],
+                ":DESIP"=> $_SERVER["REMOTE_ADDR"]
+            ));
 
 			if (count($results2) === 0)
 			{
@@ -189,9 +262,76 @@ class User
 			else
 			{
 				$dataRecovery = $results2[0];
-                
+                var_dump($dataRecovery);
                 // cria um código em base64 com o valor de idrecovery
-                $code = base64_encode($dataRecovery['idrecovery']);
+                $iduser = base64_encode($data["iduser"]);
+                $selector = base64_encode($dataRecovery['idrecovery']);
+                $code = $this->generateCode($data["iduser"]);
+				//$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
+
+				if ($inadmin === true) {
+					
+					$link = "localhost:8888/admin/forgot-password/reset?code=$code&selector=$selector&iu=$iduser";
+
+				} else {
+
+					$link = "localhost:8888/forgot-password/reset?code=$code&selector=$selector&iu=$iduser";
+
+                }
+
+                // envia por email os dados de reset da senha
+				$mailer = new Mailer($data["usemail"], $data["desname"], "Redefinir Senha da CADON", "forgot", array(
+					"name"=>$data["desname"],
+					"link"=>$link
+				));
+
+				return $mailer->send();
+
+				
+			}
+		}
+    }
+
+
+    /*
+    public function userEmailRecovery($email, $inadmin = true)
+    {
+        $sql = "SELECT *
+                FROM tb_users a
+                INNER JOIN tb_users b USING(iduser)
+                WHERE a.usemail = :EMAIL";
+        $conn = new Sql();
+        $results = $conn->select($sql, array(
+            ":EMAIL" => $email
+        ));
+
+		if (count($results) === 0)
+		{
+            throw new \Exception("Usuário não cadastrado");
+            return FALSE;
+		}
+		else
+		{
+			$data = $results[0];
+
+            $sql = "CALL sp_userspasswordsrecoveries_create(:IDUSER, :DESIP)";
+
+            $results2 = $conn->select($sql, array(
+                ":IDUSER"=> $data["iduser"],
+                ":DESIP"=> $_SERVER["REMOTE_ADDR"]
+            ));
+
+			if (count($results2) === 0)
+			{
+				throw new \Exception("Não foi possível recuperar a senha");
+            }
+            
+			else
+			{
+				$dataRecovery = $results2[0];
+                var_dump($dataRecovery);
+                // cria um código em base64 com o valor de idrecovery
+                $code = base64_encode($dataRecovery['idrecovery'] . '?' . $dataRecovery['dtregister']);
 				//$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
 
 				if ($inadmin === true) {
@@ -202,7 +342,7 @@ class User
 
 					$link = "localhost:8888/forgot-password/reset?code=$code";
 
-				}
+                }
 
                 // envia por email os dados de reset da senha
 				$mailer = new Mailer($data["usemail"], $data["desname"], "Redefinir Senha da CADON", "forgot", array(
@@ -210,19 +350,21 @@ class User
 					"link"=>$link
 				));
 
-				$mailer->send();
+				return $mailer->send();
 
-				return $data;
+				
 			}
 		}
     }
+    */
+
+
 
     // faz um decriptografia na criptografia para capturar o valor relacionado ao idrecovery
 	public static function validForgotDecrypt($code)
 	{
+        $idrecovery = base64_decode($code);
 
-		$idrecovery = base64_decode($code);
-		$conn = Connection::open('config');
         $sql = "SELECT * 
                 FROM tb_userspasswordsrecoveries a
                 INNER JOIN tb_users b USING(iduser)
@@ -231,13 +373,13 @@ class User
                     AND
                     a.dtrecovery IS NULL
                     AND
-                    DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();";
+                    DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();
+                ";
 
-        $stmt =$conn->prepare($sql);
-        $stmt->bindParam(":IDRECOVERY", $idrecovery);
-        $stmt->execute();
-
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $conn = new Sql();
+        $results = $conn->select($sql, array(
+            ":IDRECOVERY" => $idrecovery
+        ));
 
 		if (count($results) === 0)
 		{
@@ -245,24 +387,35 @@ class User
 		}
 		else
 		{
-            
 			return $results[0];
 		}
-
     }
-    
+
+    public function generateCode($iduser)
+    {
+        $sql = "SELECT uspassword from tb_users
+                WHERE iduser = :IDUSER";
+
+        $conn = new Sql();
+        $result = $conn->select($sql, array(
+            ':IDUSER' => $iduser
+        ));
+        $result = $result[0]["uspassword"];
+        $result .= User::CODE;
+        return md5($result);
+    }
+
     // reseta a senha de usuario
     public function resetPassword($uspassword, $iduser)
     {
-        $conn = Connection::open('config');
         $sql = "UPDATE tb_users 
                 SET uspassword = :USPASSWORD
                 WHERE iduser = :IDUSER";
 
-        $stmt =$conn->prepare($sql);
-        $stmt->bindParam(":USPASSWORD", $uspassword);
-        $stmt->bindParam(":IDUSER", $iduser);
-        $stmt->execute();
+        $conn = new Sql();
+        return $conn->query($sql, array(
+            ":USPASSWORD" => $this->getPasswordHash($uspassword),
+            ":IDUSER" => $iduser
+        ));
     }
-    
 }

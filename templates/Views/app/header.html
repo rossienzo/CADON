@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CADON</title>
-    <link rel="stylesheet" href="../res/css/bootstrap.css">
-    <link rel="stylesheet" href="../res/css/main.css">
-
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-        
+    <link rel="stylesheet" href="../../res/plugins/fontawesome-free/css/all.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="../../res/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="../res/plugins/bootstrap/css/bootstrap.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../res/plugins/adminlte/css/adminlte.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../res/css/main.css">
 </head>
-<body id="index">
+<body >
     <header class="fixed-top">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="/">CADON</a>
@@ -22,10 +28,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="/application">Home <span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="/pending-tasks">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/logoff">Sair <span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="/logout">Sair <span class="sr-only">(current)</span></a>
             </li>
             
           </ul>

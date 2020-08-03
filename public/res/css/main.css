@@ -27,19 +27,13 @@ list-type-ulli {
 }
 
 a {
-    color: black;
     list-style-type: none;
 }
 
 a:link {
     text-decoration: none;
-    color: black;
 }
 
-a:visited {
-
-    color: black;
-}
 
 html, body {
     height: 100%;
@@ -111,6 +105,7 @@ html, body {
  */
  
 #login {
+
     position: fixed;
     background: url('../images/login-backgroud.png') no-repeat;
     background-size: cover;
@@ -135,15 +130,28 @@ html, body {
     
 }
 
+/* branding-link */
+
 .branding-link {
-    transition: 1.4s;
-    color: grey;
+    color: black;
+}
+
+.branding-link:visited {
+
+    text-decoration: none; 
+    color:black;
 }
 
 .branding-link:hover {
     transition: 1.4s;
     color: #DB7369;
 }
+
+.branding-link:active {
+    color: #DB7369;
+}
+
+
 
 .form-center h3 {
     text-align: center;
@@ -165,6 +173,8 @@ html, body {
     padding: 15px 60px 15px 60px;
 }
 
+
+
 /* ---------------------------------------------------
  * - Application -------------------------------------
  * ---------------------------------------------------
@@ -185,6 +195,17 @@ html, body {
  {
     margin-bottom: 25px;
  }
+ 
+#app-main a
+ {
+    color: black;
+ }
+
+ /* O item selecionado fica com a cor branca */
+#app-main .active a
+{
+    color: white ;
+}
 
 #app-main .list-itens
  {

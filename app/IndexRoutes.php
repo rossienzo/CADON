@@ -11,102 +11,138 @@ use App\Controllers\IndexController;
 
 Route::add('/', function() {
 
-    $indexController = new IndexController();
+    $indexc = new IndexController();
 
-    $indexController->drawView('index');
+    
+    $indexc->assignValues('title', 'CADON'); // título
+    $indexc->drawView('header');
+    $indexc->drawView('index');
+    $indexc->drawView('footer');
+    
 });
   
 Route::add('/login', function() {
 
-    $indexController = new IndexController();
+    $indexc = new IndexController();
 
-    
     // verifica se existe algum dado passado na url
     isset($_GET['msg']) ? $msg = $_GET['msg'] : $msg = '';
 
     // envia a mensagem para o html
-    $indexController->assignValues('msg', $msg);
     
-    $indexController->drawView('login');
+    
+    $indexc->assignValues('msg', $msg);
+    $indexc->assignValues('error', $indexc->getError());
+    
+    $indexc->assignValues('title', 'CADON - Entrar'); // título
+    $indexc->drawView('header');
+    $indexc->drawView('login');
 
 });
 
-Route::add('/auth', function() {
+Route::add('/login', function() {
 
-    $indexController = new IndexController();
-    $name = $_POST['name'];
-    $password = $_POST['password'];
+    $indexc = new IndexController();
+    $login = $_POST["login"];
+    $password = $_POST["password"];
 
-    if (!isset($name) OR $name == '' || !isset($password) OR $password == '')
+    if (!isset($login) OR $login == '' || !isset($password) OR $password == '')
     {
-        header("Location: /login?msg=error");
+      $indexc->setError("Digite o usuário e a senha");
+      header("Location: /login");
     }
     else
     {
-        $indexController->authentication($name, $password);
+      $indexc->userLogin($login, $password);
+      header("Location: /pending-tasks");
     }
 
 }, 'post');
 
 Route::add('/register', function() {
 
-    $indexController = new IndexController();
-
-    // verifica se existe algum dado passado na url
-    isset($_GET['msg']) ? $msg = $_GET['msg'] : $msg = '';
+    $indexc = new IndexController();
     
-    $indexController->assignValues('msg', $msg);
-    $indexController->drawView('register');
+    $indexc->assignValues('error', $indexc->getError());
+    $indexc->assignValues('success', $indexc->getSuccess());
+    $indexc->assignValues('errorRegister', $indexc->getErrorRegister());
+
+    $indexc->assignValues('title', 'CADON - Registrar'); // title of page
+    $indexc->drawView('header');
+    $indexc->drawView('register');
+    $indexc->drawView('footer');
 });
 
-Route::add('/register/user-insert', function() {
+Route::add('/register', function() {
 
-  $indexController = new IndexController();
-  $indexController->userRegister();
-  
+  $indexc = new IndexController();
+  $indexc->register();
+                  
+  header("Location: /register");
+
 }, 'post');
 
 Route::add('/forgot-password', function() {
 
-    $indexController = new IndexController();
+    $indexc = new IndexController();
 
-    // verifica se existe algum dado passado na url
-    isset($_GET['msg']) ? $msg = $_GET['msg'] : $msg = '';
+    $indexc->assignValues('error', $indexc->getError());
+    $indexc->assignValues('success', $indexc->getSuccess());
 
-    // envia a mensagem para o html
-    $indexController->assignValues('msg', $msg);
-
-    $indexController->drawView('forgot-password');
+    $indexc->assignValues('title', 'CADON - Esqueci a senha'); // title of page
+    $indexc->drawView('header');
+    $indexc->drawView('forgot-password');
+    $indexc->drawView('footer');
 });
 
-Route::add('/forgot-password/sent', function() {
+Route::add('/forgot-password', function() {
 
-    $indexController = new IndexController();
-  var_dump($indexController->forgotPassword());
-    if ($indexController->forgotPassword())
+  $indexc = new IndexController();
+
+    if ($indexc->forgotPassword())
     {
-      $indexController->drawView('sent-email');
+      $indexc->setSuccess("Email enviado!");
+      header("Location: /forgot-password");
     }
     else
     {
-      header("Location: /forgot-password?msg=error");
+      header("Location: /forgot-password");
     }
 
-  
+  $indexc->drawView('forgot-password');
 }, 'post');
 
 Route::add('/forgot-password/reset', function(){
 
-  $indexController = new IndexController();
-  
-  $indexController->validForgotDecrypt();
+  $indexc = new IndexController();
 
-  $indexController->assignValues('code', $_GET["code"]);
-  $indexController->drawView('recover-password');
+  $indexc->reset();
+  $indexc->assignValues('error', $indexc->getError());
+  $indexc->assignValues('success', $indexc->getSuccess());
+  $indexc->assignValues('code', $_GET["selector"]);
+
+
+  $indexc->assignValues('title', 'CADON - Recuperar a senha'); // title of page
+
+  $indexc->drawView('header');
+  $indexc->drawView('recover-password');
+  $indexc->drawView('footer');
+  
 });
 
 Route::add('/forgot-password/reset', function(){
 
-  $indexController = new IndexController();
-  $indexController->reset();
+  $indexc = new IndexController();
+
+  if ($indexc->reset())
+    {
+      $indexc->setSuccess("Senha alterada com sucesso!");
+
+      $indexc->assignValues('success', $indexc->getSuccess());
+      $indexc->assignValues('title', 'CADON - Recuperar a senha'); // title of page
+      $indexc->drawView('header');
+      $indexc->drawView('recover-password');
+      $indexc->drawView('footer');
+    }
+
 }, 'post');
